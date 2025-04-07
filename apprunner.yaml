@@ -3,7 +3,7 @@ runtime: PYTHON_3
 build:
   commands:
     build:
-      - echo "Build step test successful"
+      - echo "Build step test successfully"
 run:
   command: gunicorn --workers 4 --bind :$PORT run:app
   network:
