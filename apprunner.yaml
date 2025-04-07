@@ -3,7 +3,7 @@ runtime: PYTHON_3
 build:
   commands:
     build:
-      - pip install -r requirements.txt
+      - echo "Build step test successful"
 run:
   command: gunicorn --workers 4 --bind :$PORT run:app
   network:
