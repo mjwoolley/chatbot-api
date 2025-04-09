@@ -25,4 +25,5 @@ ENV AWS_REGION_NAME=us-east-1
 
 # Run run.py when the container launches using Gunicorn
 # Use the PORT environment variable provided by App Runner
-CMD ["gunicorn", "--bind", ":$PORT", "--workers", "4", "run:app"]
+# Use shell form so $PORT is expanded
+CMD gunicorn --bind :$PORT --workers 4 run:app
