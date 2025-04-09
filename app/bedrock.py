@@ -13,10 +13,33 @@ def get_bedrock_client():
         try:
             # Use environment variables loaded by Flask app
             aws_region = os.environ.get("AWS_REGION_NAME", "us-east-1") 
-            # Credentials should be handled by boto3's standard chain 
-            # (environment vars, shared credential file, IAM role, etc.)
-            bedrock_runtime = boto3.client(service_name='bedrock-runtime', region_name=aws_region)
+            profile_name = os.environ.get("AWS_PROFILE", None)
+            
+            # Log which profile we're using
+            if profile_name:
+                current_app.logger.info(f"Using AWS profile: {profile_name}")
+            else:
+                current_app.logger.info("No AWS profile specified, using default credential chain")
+            
+            # Create a session with the profile if specified
+            if profile_name:
+                session = boto3.Session(profile_name=profile_name)
+                bedrock_runtime = session.client(service_name='bedrock-runtime', region_name=aws_region)
+            else:
+                # Credentials should be handled by boto3's standard chain 
+                # (environment vars, shared credential file, IAM role, etc.)
+                bedrock_runtime = boto3.client(service_name='bedrock-runtime', region_name=aws_region)
+                
             current_app.logger.info(f"Bedrock client initialized for region: {aws_region}")
+            
+            # Debug: Check if we have valid credentials
+            try:
+                sts = boto3.client('sts')
+                identity = sts.get_caller_identity()
+                current_app.logger.info(f"AWS Identity: {identity['Arn']}")
+            except Exception as e:
+                current_app.logger.warning(f"Could not verify AWS identity: {e}")
+                
         except Exception as e:
             current_app.logger.error(f"Error initializing Bedrock client: {e}")
             # Raise the exception to be caught by the route handler
